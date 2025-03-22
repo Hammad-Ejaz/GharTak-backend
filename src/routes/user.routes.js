@@ -1,24 +1,37 @@
-// routes/user.routes.js
-import express from "express";
-import { requireAuth } from "@clerk/clerk-sdk-node";
+import { Router } from "express";
 import {
+  changeCurrentPassword,
   getCurrentUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  registerUser,
+  deleteUser,
   updateUserProfile,
   updateUserLocation,
   updateUserCredits,
   getAllUsers
 } from "../controllers/user.controller.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { verifyAdmin } from "../middlewares/admin.middleware.js";
 
-const router = express.Router();
+const router = Router();
 
-// Authenticated user routes
-router.get("/current", requireAuth(), getCurrentUser);
-router.patch("/profile", requireAuth(), updateUserProfile);
-router.patch("/location", requireAuth(), updateUserLocation);
+// Public routes
+router.route("/login").post(loginUser);
+router.route("/refresh-token").post(refreshAccessToken);
 
-// Admin-only user routes
-router.get("/all", requireAuth(), verifyAdmin, getAllUsers);
-router.patch("/credits/:userId", requireAuth(), verifyAdmin, updateUserCredits);
+// Protected routes
+router.route("/logout").post(verifyJWT, logoutUser);
+router.route("/change-password").post(verifyJWT, changeCurrentPassword);
+router.route("/current-user").get(verifyJWT, getCurrentUser);
+router.route("/update-profile").patch(verifyJWT, updateUserProfile);
+router.route("/update-location").patch(verifyJWT, updateUserLocation);
+
+// Admin protected routes
+router.route("/register").post(verifyJWT, verifyAdmin, registerUser);
+router.route("/credits/:userId").patch(verifyJWT, verifyAdmin, updateUserCredits);
+router.route("/users").get(verifyJWT, verifyAdmin, getAllUsers);
+router.route("/:id").delete(verifyJWT, verifyAdmin, deleteUser);
 
 export default router;

@@ -1,5 +1,5 @@
 import express from "express";
-import { requireAuth } from "@clerk/clerk-sdk-node";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { verifyAdmin } from "../middlewares/admin.middleware.js";
 import {upload} from "../middlewares/multer.middleware.js";
 import {
@@ -16,42 +16,42 @@ const router = express.Router();
 // User routes
 router.post(
     "/",
-    requireAuth(),
+    verifyJWT,
     upload.single("paymentScreenshot"),
     placeOrder
 );
 
 router.get(
     "/my-orders",
-    requireAuth(),
+    verifyJWT,
     getUserOrders
 );
 
 // Admin routes
 router.get(
     "/",
-    requireAuth(),
+    verifyJWT,
     verifyAdmin,
     getAllOrders
 );
 
 router.get(
     "/nearby",
-    requireAuth(),
+    verifyJWT,
     verifyAdmin,
     getNearbyOrders
 );
 
 router.patch(
     "/:orderId/status",
-    requireAuth(),
+    verifyJWT,
     verifyAdmin,
     updateOrderStatus
 );
 
 router.patch(
     "/:orderId/payment-status",
-    requireAuth(),
+    verifyJWT,
     verifyAdmin,
     verifyPayment
 );

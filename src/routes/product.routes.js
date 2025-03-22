@@ -1,6 +1,5 @@
 // routes/product.routes.js
 import express from "express";
-import { requireAuth } from "@clerk/clerk-sdk-node";
 import {
   createProduct,
   updateProduct,
@@ -11,19 +10,20 @@ import {
   getProductsByCategory
 } from "../controllers/product.controller.js";
 import { verifyAdmin } from "../middlewares/admin.middleware.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
 const router = express.Router();
 
 // Public routes
-router.get("/", getAllProducts);
-router.get("/:productId", getProductById);
-router.get("/category/:category", getProductsByCategory);
+router.get("/",verifyJWT, getAllProducts);
+router.get("/:productId",verifyJWT, getProductById);
+router.get("/category/:category",verifyJWT, getProductsByCategory);
 
 // Admin-only routes
 router.post(
-  "/",
-  requireAuth(),
+  "/create",
+  verifyJWT,
   verifyAdmin,
   upload.single("image"),
   createProduct
@@ -31,7 +31,7 @@ router.post(
 
 router.patch(
   "/:productId",
-  requireAuth(),
+  verifyJWT,
   verifyAdmin,
   upload.single("image"),
   updateProduct
@@ -39,14 +39,14 @@ router.patch(
 
 router.delete(
   "/:productId",
-  requireAuth(),
+  verifyJWT,
   verifyAdmin,
   deleteProduct
 );
 
 router.patch(
   "/stock/:productId",
-  requireAuth(),
+  verifyJWT,
   verifyAdmin,
   updateStock
 );

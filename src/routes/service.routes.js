@@ -1,6 +1,5 @@
 // routes/service.routes.js
 import express from "express";
-import { requireAuth } from "@clerk/clerk-sdk-node";
 import {
   createService,
   updateService,
@@ -10,19 +9,20 @@ import {
   getServicesByCategory
 } from "../controllers/service.controller.js";
 import { verifyAdmin } from "../middlewares/admin.middleware.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
 const router = express.Router();
 
-// Public routes
-router.get("/", getAllServices);
-router.get("/:serviceId", getServiceById);
-router.get("/category/:category", getServicesByCategory);
+// Secure routes
+router.get("/", verifyJWT, getAllServices);
+router.get("/:serviceId",verifyJWT, getServiceById);
+router.get("/category/:category", verifyJWT, getServicesByCategory);
 
 // Admin-only routes
 router.post(
   "/",
-  requireAuth(),
+  verifyJWT,
   verifyAdmin,
   upload.single("image"),
   createService
@@ -30,7 +30,7 @@ router.post(
 
 router.patch(
   "/:serviceId",
-  requireAuth(),
+  verifyJWT,
   verifyAdmin,
   upload.single("image"),
   updateService
@@ -38,7 +38,7 @@ router.patch(
 
 router.delete(
   "/:serviceId",
-  requireAuth(),
+  verifyJWT,
   verifyAdmin,
   deleteService
 );
