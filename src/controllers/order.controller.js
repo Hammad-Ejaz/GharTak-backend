@@ -12,13 +12,22 @@ const placeOrder = asyncHandler(async (req, res) => {
   const { items, paymentMethod, location } = req.body;
   const userId = req.user._id;
 
-  // Validate input
-  if (!items?.length || !paymentMethod || !location?.coordinates) {
+  // Validate input (remove location from required fields)
+  if (!items?.length || !paymentMethod) {
     throw new apiError(400, "Missing required fields");
   }
 
   const user = await User.findById(userId);
   if (!user) throw new apiError(404, "User not found");
+
+  // Get location from request or user profile
+  let orderLocation = location;
+  if (!orderLocation?.coordinates) {
+    if (!user.location?.coordinates) {
+      throw new apiError(400, "Location is required - provide in request or user profile");
+    }
+    orderLocation = user.location;
+  }
 
   let totalAmount = 0;
   const processedItems = [];
@@ -86,7 +95,7 @@ const placeOrder = asyncHandler(async (req, res) => {
     status: "pending",
     location: {
       type: "Point",
-      coordinates: location.coordinates
+      coordinates: orderLocation.coordinates
     }
   });
 

@@ -14,7 +14,6 @@ const createProduct = asyncHandler(async (req, res) => {
 
   const { name, description, price, category, stock } = req.body;
 
-
   // Handle image upload
   let imageUrl;
   if (req.file) {

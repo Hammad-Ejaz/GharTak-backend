@@ -48,7 +48,7 @@ const updatePaymentStatus = asyncHandler(async (req, res) => {
   }
 
   const { paymentId } = req.params;
-  const { status, reason } = req.body;
+  const { status } = req.body;
 
   if (!["verified", "rejected"].includes(status)) {
     throw new apiError(400, "Invalid payment status");
@@ -64,9 +64,7 @@ const updatePaymentStatus = asyncHandler(async (req, res) => {
     throw new apiError(400, "Payment has already been processed");
   }
 
-  payment.status = status;
-  if (reason) payment.reason = reason;
-  
+  payment.status = status;  
   const updatedPayment = await payment.save();
 
   // Add credits if verified
@@ -88,17 +86,16 @@ const updatePaymentStatus = asyncHandler(async (req, res) => {
 // Get all payments (Admin)
 const getAllPayments = asyncHandler(async (req, res) => {
   if (!req.user?.admin) {
-    throw new apiError(403, "Unauthorized: Only admins can view all payments");
+    throw new apiError(403, "Unauthorized: Only admins can view payments");
   }
-  
-  const { status } = req.query;
-  const filter = {};
-  
-  if (status) filter.status = status;
 
-  const payments = await Payment.find(filter)
-    .sort({ createdAt: -1 })
-    .populate("user", "name email");
+  // Get all payments sorted with pending first and oldest first within each status
+  const payments = await Payment.find({})
+    .sort({ 
+      status: 1,  // 1 for ascending (pending comes first in enum order)
+      createdAt: 1  // Oldest payments first within same status
+    })
+    .populate('user', 'username email');
 
   return res
     .status(200)

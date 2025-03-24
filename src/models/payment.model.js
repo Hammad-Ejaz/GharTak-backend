@@ -9,7 +9,7 @@ const paymentSchema = new mongoose.Schema(
     },
     amount: {
       type: Number,
-      required: true,
+      // required: true,
       min: 0,
     },
     screenshot: {
