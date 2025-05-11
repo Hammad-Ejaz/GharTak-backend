@@ -29,7 +29,7 @@ router.route("/update-profile").patch(verifyJWT, updateUserProfile);
 router.route("/update-location").patch(verifyJWT, updateUserLocation);
 
 // Admin protected routes
-router.route("/register").post(verifyJWT, verifyAdmin, registerUser);
+router.route("/register").post(registerUser);
 // router.route("/credits/:userId").patch(verifyJWT, verifyAdmin, updateUserCredits);
 router.route("/users").get(verifyJWT, verifyAdmin, getAllUsers);
 router.route("/:id").delete(verifyJWT, verifyAdmin, deleteUser);
